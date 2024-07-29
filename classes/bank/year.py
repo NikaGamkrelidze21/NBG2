@@ -5,6 +5,11 @@ class Year:
     def __init__(self, year):
         self.year = year
         self.quarters = {"Q1": None, "Q2": None, "Q3": None, "Q4": None}
+        # print("Created Year:", self.year, self.quarters)
+
+    def __str__(self):
+        q_s = self.quarters
+        return f"Year: {self.year} Quarters: {q_s}\n"
 
     def set_quarter(self, q_num, quarter: Quarter):
         if isinstance(quarter, Quarter):

@@ -1,16 +1,18 @@
+from datetime import datetime
 from pprint import pprint
-
+from json import dumps
 import requests
 from bs4 import BeautifulSoup
 
 from classes.bank.bank import Bank
+from classes.bank.quarter import Quarter
 from classes.bank.year import Year
 from components.helpers.fix_name import fix_name
 
 
 def http_main(URL):
     bank_link_dict = {}
-
+    bank_list = []
     response = requests.get(URL)
     sup = BeautifulSoup(response.text, 'html.parser')
     table_soup = sup.find('div',
@@ -20,8 +22,26 @@ def http_main(URL):
 
     for bank in list_bank_soup:
         bank_name = fix_name(bank.find("a").text)
+        years = bank.find("div", class_="jsx-2864173099 grid flex-1 grid-cols-6").find_all("ul")
 
-    pprint(bank_link_dict)
+        bank_obj = Bank(bank_name)
+
+        for year, content in enumerate(years):
+            quarters = content.find_all("li")
+
+            year_obj = Year(datetime.today().year - year)
+            for index, quarter in enumerate(quarters):
+                quarter_name = index + 1
+                link = quarter.find("a").attrs["href"] if quarter.find("a") is not None else None
+                quarter_obj = Quarter(quarter_name)
+                quarter_obj.set_link(link)
+                year_obj.set_quarter(quarter_name-1, quarter_obj)
+            bank_obj.add_year(year_obj)
+
+        bank_list.append(bank_obj)
+
+    # for i in bank_list:
+    #     print(i.get_name(), bank_obj.get_year_list()[0].get_quarters()['Q1'].get_link())
 
 
 if __name__ == "__main__":
